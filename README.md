@@ -36,7 +36,7 @@ cd ai-multimodal-emotion-therapy
 pip install -r requirements.txt
 ```
 
-📊 Datasets
+## 📊 Datasets
 We use publicly available emotion datasets for fine-tuning and training the models, such as:
 
 - ISEAR (Emotion Classification)
