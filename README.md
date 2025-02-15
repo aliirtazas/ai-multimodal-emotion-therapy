@@ -10,11 +10,11 @@ This project integrates natural language processing (NLP), computer vision (CV),
 
 ✔ **Text-Based Emotion Analysis (NLP)** – Uses a fine-tuned BERT-based model to classify emotions from patient responses.
 
-✔ Facial Emotion Detection (CV) – Detects emotions like joy, sadness, anger, and surprise using deep learning models.
+✔ **Facial Emotion Detection (CV)** – Detects emotions like joy, sadness, anger, and surprise using deep learning models.
 
-✔ Motion Detection – Segments video dynamically to isolate patient responses.
+✔ **Motion Detection** – Segments video dynamically to isolate patient responses.
 
-✔ Emotion Visualization – Generates emotion graphs to track sentiment trends over time.
+✔ **Emotion Visualization** – Generates emotion graphs to track sentiment trends over time.
 
 ## Project Structure
 
