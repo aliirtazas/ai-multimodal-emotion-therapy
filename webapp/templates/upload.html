@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Upload{% endblock %}
+{% block content %}
+<h2>Upload Therapy Session Video</h2>
+<p>Please select a pre-recorded video file (Zoom or Google Meet session). The system will process facial and speech-based emotions from the patient.</p>
+
+<form id="upload-form" method="POST" enctype="multipart/form-data">
+  <input type="file" name="video" required />
+  <button type="submit" class="btn">Analyze Video</button>
+</form>
+
+<div id="processing-popup" class="popup">🔄 Processing video... Please wait.</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}

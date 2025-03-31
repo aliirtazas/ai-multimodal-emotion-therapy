@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Welcome to EmotionTherapy{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero" data-aos="fade-up">
+  <div class="hero-content">
+    <h1 class="hero-title">Unlock Deeper Emotional Insight</h1>
+    <p class="hero-subtitle">
+      AI-powered emotion tracking from therapy session videos — empowering therapists to understand emotions in real-time.
+    </p>
+    <a href="{{ url_for('signup') }}" class="btn big">Start Free</a>
+  </div>
+</section>
+
+<!-- PRODUCT HIGHLIGHT -->
+<section class="highlight" data-aos="fade-up">
+  <div class="highlight-content">
+    <h2>Analyze Patient Emotions Like Never Before</h2>
+    <p>Our system uses state-of-the-art AI to detect facial expressions and speech sentiment in online therapy sessions. With our dashboard, therapists can visually track emotional changes over time.</p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" data-aos="fade-left">
+  <div class="feature-box">
+    <h3>🎙️ Speech Emotion Recognition</h3>
+    <p>Using Whisper + BERT to extract emotions from spoken language in real-time.</p>
+  </div>
+  <div class="feature-box">
+    <h3>📸 Facial Emotion Detection</h3>
+    <p>Frame-by-frame facial emotion analysis using deep learning models.</p>
+  </div>
+  <div class="feature-box">
+    <h3>📊 Interactive Emotion Dashboard</h3>
+    <p>Side-by-side comparison of facial and speech emotion over time — like Power BI but specialized for therapy.</p>
+  </div>
+  <div class="feature-box">
+    <h3>🔒 Therapist Portal</h3>
+    <p>Secure login and upload for verified therapists. All sessions are private and confidential.</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" data-aos="zoom-in">
+  <h2>Start Unlocking Emotional Intelligence</h2>
+  <p>Get insights from your therapy sessions in seconds. Simply upload a recorded session and get started.</p>
+  <a href="{{ url_for('signup') }}" class="btn">Create Your Free Account</a>
+</section>
+
+{% endblock %}
