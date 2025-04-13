@@ -165,7 +165,6 @@ def extract_faces_for_client_segments(client_df, video_path, output_dir, view_ty
 
     cap = cv2.VideoCapture(video_path)
     for idx, row in client_df.iterrows():
-        # cap.set(cv2.CAP_PROP_POS_MSEC, row['Mid_sec'] * 1000)
         cap.set(cv2.CAP_PROP_POS_MSEC, row['Mid_sec'] * 1000)
         ret, frame = cap.read()
         if not ret:
@@ -261,46 +260,6 @@ def add_face_emotions_to_client_df(client_df, model_path):
     return client_df
 
 # --------------------------- Main Processing Pipeline ---------------------------
-
-# def process_video_pipeline(video_path, hf_token, view_type, face_option):
-#     from pipeline import (
-#         transcribe_and_diarize,
-#         load_speaker_model,
-#         classify_and_map_speakers,
-#         merge_conversation_segments,
-#         extract_faces_for_client_segments,
-#         add_speech_emotions_to_client_df,
-#         add_face_emotions_to_client_df,
-#     )
-
-#     import os
-
-#     # Step 1: Transcribe & Diarize
-#     df = transcribe_and_diarize(video_path, hf_token)
-
-#     # Step 2: Speaker Classification
-#     speaker_model_dir = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\speaker_prediction_roberta_model"
-#     model, tokenizer, label_encoder = load_speaker_model(speaker_model_dir, device="cuda" if torch.cuda.is_available() else "cpu")
-#     df = classify_and_map_speakers(df, model, tokenizer, label_encoder, device="cuda" if torch.cuda.is_available() else "cpu")
-
-#     # Step 3: Merge Segments
-#     final_df = merge_conversation_segments(df)
-
-#     # Step 4: Face Extraction for Client Segments
-#     client_df = final_df[final_df["Speaker"].str.lower() == "client"].copy()
-#     face_output_dir = os.path.join("static", "client_faces")
-#     client_df = extract_faces_for_client_segments(client_df, video_path, face_output_dir, view_type, face_option)
-
-#     # Step 5: Add Speech Emotions
-#     speech_model_path = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\deberta_model"
-#     client_df = add_speech_emotions_to_client_df(client_df, speech_model_path)
-
-#     # Step 6: Add Face Emotions
-#     face_model_path = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\cv model\best_model (1).pth"
-#     client_df = add_face_emotions_to_client_df(client_df, face_model_path)
-
-#     return final_df, client_df
-
 
 def process_video_pipeline(video_path, hf_token, view_type, face_option):
     # Paths
