@@ -1,9 +1,9 @@
 # AI-Powered Multimodal Emotion Analysis System for Therapy Session
 
-**🔍 An AI-powered system for analyzing patient emotions in therapy using NLP, computer vision, and motion detection.**
+**🔍 An AI system for analyzing patient emotions in therapy using speech transcription, facial expression recognition, and speaker-based segmentation.**
 
 ## 📌 Overview
-This project integrates natural language processing (NLP), computer vision (CV), and motion detection to analyze patient emotions in therapy sessions. It extracts speech, detects facial expressions, and segments video to provide therapists with a comprehensive emotional profile of each session.
+This system integrates **Natural Language Processing (NLP)** and **Computer Vision (CV)** to analyze client emotions in recorded therapy sessions (e.g., Zoom, Google Meet). It performs speaker-based segmentation, transcribes patient responses, and classifies both spoken and facial emotions using deep learning. Therapists can upload session recordings (Gallery View or Speaker View), and the system automatically extracts the patient's segments to generate detailed emotional timelines and visualizations.
 
 ## 🚀 Features
 ✔ **Speech-to-Text Conversion** – Extracts spoken responses using ASR (Automatic Speech Recognition).
@@ -12,7 +12,9 @@ This project integrates natural language processing (NLP), computer vision (CV),
 
 ✔ **Facial Emotion Detection (CV)** – Detects emotions like joy, sadness, anger, and surprise using deep learning models.
 
-✔ **Motion Detection** – Segments video dynamically to isolate patient responses.
+✔ **Speaker-Based Segmentation** – Automatically separates therapist and client turns using diarization and speaker classification.
+
+✔ **Video View Support** – Handles both Gallery View and Speaker View recordings for accurate face extraction.
 
 ✔ **Emotion Visualization** – Generates emotion graphs to track sentiment trends over time.
 
@@ -22,9 +24,10 @@ This project integrates natural language processing (NLP), computer vision (CV),
 📁 ai-multimodal-emotion-therapy
 │── 📂 data/                # Dataset storage  
 │── 📂 models/              # Pre-trained and fine-tuned models  
-│── 📂 scripts/             # Core processing scripts  
-│── 📂 notebooks/           # Experimentation & visualization notebooks  
-│── main.py                 # End-to-end pipeline
+│── 📂 notebooks_code/      # Experimentation & visualization notebooks  
+│── 📂 results/
+│── 📂 uploads/
+│── 📂 webapp/              # webapp created using flask
 |── requirement.txt         # Python dependencies
 │── README.md               # Project documentation
 ```
@@ -34,6 +37,10 @@ This project integrates natural language processing (NLP), computer vision (CV),
 git clone https://github.com/your-username/ai-multimodal-emotion-therapy.git
 cd ai-multimodal-emotion-therapy
 pip install -r requirements.txt
+
+# Run the Flask app
+cd webapp
+python app.py
 ```
 
 ## 📊 Datasets
