@@ -171,4 +171,13 @@ cython_debug/
 .pypirc
 
 /data/
-webapp/uploads/Telemental Health Mock Session.mp4
+/models/
+/notebooks_code/segmentation/Extracted_Images/
+/notebooks_code/segmentation/videos/
+/webapp/static/sessions/
+/webapp/static/wordclouds/
+/uploads/
+/webapp/uploads/
+/webapp/static/*.png
+/webapp/static/*.jpg
+/webapp/static/*.jpeg

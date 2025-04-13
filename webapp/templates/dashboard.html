@@ -1,8 +1,50 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<h2>Emotion Analysis Dashboard</h2>
-<div class="dashboard-container">
-    {{ graph_html|safe }}
-</div>
+<h2>📊 Emotion Analysis Dashboard</h2>
+
+<!-- Section: Summary Visuals (side-by-side) -->
+<section class="dashboard-row" style="display: flex; flex-wrap: wrap; gap: 40px; margin-bottom: 40px;">
+  <div style="flex: 1; min-width: 300px;">
+    <h3>✅ Emotion Agreement</h3>
+    <img src="{{ url_for('static', filename='emotion_match_pie.png') }}" width="100%" />
+  </div>
+  <div style="flex: 2; min-width: 400px;">
+    <h3>📶 Emotion Distribution</h3>
+    <img src="{{ url_for('static', filename='emotion_distribution_bar.png') }}" width="100%" />
+  </div>
+</section>
+
+<!-- Section: Emotion Timeline -->
+<section class="dashboard-block" style="margin-bottom: 60px;">
+  <h3>🎭 Dynamic Emotion Timeline</h3>
+  <div>{{ graph_html|safe }}</div>
+</section>
+
+<!-- Section: Speaker Timeline -->
+<section class="dashboard-block" style="margin-bottom: 60px;">
+  <h3>👥 Speaker Timeline</h3>
+  <div>{{ speaker_html|safe }}</div>
+</section>
+
+<!-- Section: Emotion Transition Sankey -->
+<section class="dashboard-block" style="margin-bottom: 60px;">
+  <h3>🔁 Emotion Transition Flow</h3>
+  <div>{{ sankey_html|safe }}</div>
+</section>
+
+<!-- Section: Word Clouds -->
+<section class="dashboard-block">
+  <h3>☁️ Word Clouds by Emotion</h3>
+  <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+    {% for emotion, path in wordcloud_paths %}
+      <div style="text-align: center; width: 300px;">
+        <h4>{{ emotion }}</h4>
+        <img src="{{ url_for('static', filename=path) }}" width="100%" />
+      </div>
+    {% endfor %}
+  </div>
+</section>
 {% endblock %}
+
