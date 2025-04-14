@@ -23,6 +23,7 @@ import torch.nn as nn
 from moviepy import *
 
 # ----- Global Variables -----
+
 emotion_labels = {
     0: "Anger", 1: "Fear", 2: "Happy", 3: "Sadness",
     4: "Neutral", 5: "Surprise", 6: "Confusion", 7: "Disgust"
@@ -266,7 +267,7 @@ def process_video_pipeline(video_path, hf_token, view_type, face_option):
     speaker_model_path = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\speaker_prediction_roberta_model"
     speech_model_path = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\deberta_model"
     face_model_path = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\cv model\best_model (1).pth"
-    output_dir = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\notebooks_code\segmentation\Extracted_Images"
+    output_dir = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\webapp\Extracted_Images"
 
     #Transcribe
     df = transcribe_and_diarize(video_path, hf_token=hf_token)
@@ -289,17 +290,16 @@ def process_video_pipeline(video_path, hf_token, view_type, face_option):
     client_df = client_df.dropna()
     client_df.reset_index(drop=True, inplace=True)
 
-    # Step 6: Text emotion prediction
+    #Text emotion prediction
     client_df = add_speech_emotions_to_client_df(client_df, speech_model_path)
 
-    # Step 7: Face emotion prediction
+    #Face emotion prediction
     client_df = add_face_emotions_to_client_df(client_df, face_model_path)
 
-    # Step 8: Merge back into final_df
+    # Merge back into final_df
     for idx in client_df.index:
         final_df.loc[client_df.index[idx], 'Image_Path'] = client_df.at[idx, 'Image_Path']
         final_df.loc[client_df.index[idx], 'speech_predicted_emotion'] = client_df.at[idx, 'speech_predicted_emotion']
         final_df.loc[client_df.index[idx], 'face_emotion_prediction'] = client_df.at[idx, 'face_emotion_prediction']
 
     return final_df, client_df
-
