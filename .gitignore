@@ -181,3 +181,4 @@ cython_debug/
 /webapp/static/*.png
 /webapp/static/*.jpg
 /webapp/static/*.jpeg
+/webapp/Extracted_Images/*.jpg
