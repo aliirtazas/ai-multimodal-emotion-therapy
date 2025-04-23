@@ -3,49 +3,58 @@
 {% block content %}
 
 <!-- HERO -->
-<section class="hero" data-aos="fade-up">
-  <div class="hero-content">
-    <h1 class="hero-title">Unlock Deeper Emotional Insight</h1>
-    <p class="hero-subtitle">
-      AI-powered emotion tracking from therapy session videos — empowering therapists to understand emotions in real-time.
-    </p>
-    <a href="{{ url_for('signup') }}" class="btn big">Start Free</a>
+<section class="hero-section" data-aos="fade">
+  <div class="hero-container">
+    <div class="hero-text">
+      <h1 class="hero-title">
+        <span class="gradient-text">Emotional Insights</span> from Your Therapy Sessions
+      </h1>
+      <p class="hero-subtitle">
+        Upload a recorded therapy session and get a full emotional breakdown—analyzing speech and facial expressions to generate an interactive dashboard.
+      </p>
+      <div class="hero-cta">
+        <a href="{{ url_for('signup') }}" class="btn-primary">Start Free Analysis</a>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- PRODUCT HIGHLIGHT -->
-<section class="highlight" data-aos="fade-up">
+<!-- PRODUCT HIGHLIGHT (wrapped in blue box) -->
+<section class="highlight-box">
   <div class="highlight-content">
-    <h2>Analyze Patient Emotions Like Never Before</h2>
-    <p>Our system uses state-of-the-art AI to detect facial expressions and speech sentiment in online therapy sessions. With our dashboard, therapists can visually track emotional changes over time.</p>
+    <h2>Analyze Patient Emotions using Online Therapy Session Video</h2>
+    <p>
+      Our system uses state-of-the-art AI to detect facial expressions and speech sentiment in online therapy sessions.
+      With our dashboard, therapists can visually track emotional changes over time and gain insights from the session.
+    </p>
   </div>
 </section>
 
 <!-- FEATURES -->
-<section class="features" data-aos="fade-left">
-  <div class="feature-box">
+<section class="features value-grid" data-aos="fade-left">
+  <div class="feature-box value-card">
     <h3>🎙️ Speech Emotion Recognition</h3>
-    <p>Using Whisper + BERT to extract emotions from spoken language in real-time.</p>
+    <p>Real-time speech transcription using WhisperX combined with emotion prediction powered by DeBERTa.</p>
   </div>
-  <div class="feature-box">
+  <div class="feature-box value-card">
     <h3>📸 Facial Emotion Detection</h3>
-    <p>Frame-by-frame facial emotion analysis using deep learning models.</p>
+    <p>Frame-by-frame facial emotion analysis utilizing advanced deep learning models.</p>
   </div>
-  <div class="feature-box">
+  <div class="feature-box value-card">
     <h3>📊 Interactive Emotion Dashboard</h3>
-    <p>Side-by-side comparison of facial and speech emotion over time — like Power BI but specialized for therapy.</p>
+    <p>Visualize and compare facial and speech-based emotions side-by-side over session duration, tailored specifically for therapy analytics.</p>
   </div>
-  <div class="feature-box">
+  <div class="feature-box value-card">
     <h3>🔒 Therapist Portal</h3>
-    <p>Secure login and upload for verified therapists. All sessions are private and confidential.</p>
+    <p>Secure login and video upload interface exclusively for verified therapists. All sessions are encrypted and confidential.</p>
   </div>
 </section>
 
 <!-- CTA -->
-<section class="cta" data-aos="zoom-in">
+<section class="cta-box">
   <h2>Start Unlocking Emotional Intelligence</h2>
   <p>Get insights from your therapy sessions in seconds. Simply upload a recorded session and get started.</p>
-  <a href="{{ url_for('signup') }}" class="btn">Create Your Free Account</a>
+  <a href="{{ url_for('signup') }}" class="btn-primary">Create Your Free Account</a>
 </section>
 
 {% endblock %}

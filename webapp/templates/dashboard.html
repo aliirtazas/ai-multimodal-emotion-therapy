@@ -34,6 +34,18 @@
   <div>{{ sankey_html|safe }}</div>
 </section>
 
+<!-- Section: Emotion Heatmap -->
+<section class="dashboard-block" style="margin-bottom: 60px;">
+  <h3> Emotion Frequency Heatmap Over Time (Speech)</h3>
+  <img src="{{ url_for('static', filename='emotion_heatmap.png') }}" style="width:100%; border-radius:12px;"/>
+</section>
+
+<!-- Section: Face Emotion Heatmap -->
+<section class="dashboard-block" style="margin-top: 60px; margin-bottom: 60px;">
+  <h3> Emotion Frequency Heatmap Over Time (Face)</h3>
+  <img src="{{ url_for('static', filename='emotion_heatmap_face.png') }}" style="width:100%; border-radius:12px;"/>
+</section>
+
 <!-- Section: Word Clouds -->
 <section class="dashboard-block">
   <h3>☁️ Word Clouds by Emotion</h3>
