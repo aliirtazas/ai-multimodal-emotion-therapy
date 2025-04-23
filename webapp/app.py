@@ -9,6 +9,10 @@ import numpy as np
 import io
 import base64
 from pipeline import process_video_pipeline
+from wordcloud import WordCloud
+from collections import Counter
+import shutil
+import seaborn as sns
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
@@ -142,22 +146,14 @@ def dashboard():
     client_df["speech_emotion_id"] = client_df["speech_predicted_emotion"].map(emotion_to_id)
     client_df["face_emotion_id"] = client_df["face_emotion_prediction"].map(emotion_to_id)
 
-    # --- Emotion Timeline ---
-    import plotly.graph_objects as go
-    import matplotlib.pyplot as plt
-    from wordcloud import WordCloud
-    from collections import Counter
-    import shutil
-    import os
-    import numpy as np
-
+    # --- Emotion Timeline ---------------------------------------------------------------------
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=client_df["start_sec"],
         y=client_df["speech_emotion_id"],
         mode='lines+markers',
         name='Speech Emotion',
-        marker=dict(size=10, color='royalblue'),
+        marker=dict(size=10, color='#1f77b4'),  # Navy Blue
         line=dict(width=2),
         text=client_df["speech_predicted_emotion"],
         hovertemplate='Time: %{x}s<br>Speech: %{text}<extra></extra>'
@@ -167,13 +163,12 @@ def dashboard():
         y=client_df["face_emotion_id"],
         mode='lines+markers',
         name='Face Emotion',
-        marker=dict(size=10, color='orange'),
+        marker=dict(size=10, color='#ff7f0e'),  # Orange
         line=dict(width=2),
         text=client_df["face_emotion_prediction"],
         hovertemplate='Time: %{x}s<br>Face: %{text}<extra></extra>'
     ))
     fig.update_layout(
-        title="🎭 Dynamic Emotion Timeline (Speech vs Face)",
         xaxis_title="Time (seconds)",
         yaxis=dict(
             title="Emotion",
@@ -183,22 +178,23 @@ def dashboard():
         ),
         legend=dict(x=0.01, y=0.99),
         template="plotly_white",
-        height=500
+        height=600
     )
     graph_html = fig.to_html(full_html=False)
 
-    # --- Emotion Match Pie Chart ---
+    # --- Emotion Match Pie Chart ----------------------------------------------------------------------------
     client_df["emotion_match"] = client_df["speech_predicted_emotion"] == client_df["face_emotion_prediction"]
     match_counts = client_df["emotion_match"].value_counts()
     labels = ["Match" if x else "Mismatch" for x in match_counts.index]
-    plt.figure(figsize=(6, 6))
-    plt.pie(match_counts, labels=labels, autopct="%1.1f%%", colors=["lightgreen", "tomato"])
+    colors_pie = ['#1f77b4', '#ff7f0e']  # Green for match, Orange for mismatch
+    plt.figure(figsize=(6, 7))
+    plt.pie(match_counts, labels=labels, autopct="%1.1f%%", colors=colors_pie)
     plt.title("Emotion Agreement Between Speech & Face")
     plt.tight_layout()
     plt.savefig("static/emotion_match_pie.png")
     plt.close()
 
-    # --- Emotion Distribution Bar Chart ---
+    # --- Emotion Distribution Bar Chart -----------------------------------------------------------------------
     speech_counts = client_df["speech_predicted_emotion"].value_counts()
     face_counts = client_df["face_emotion_prediction"].value_counts()
     all_emotions = sorted(set(speech_counts.index) | set(face_counts.index))
@@ -206,9 +202,9 @@ def dashboard():
     face_counts = face_counts.reindex(all_emotions, fill_value=0)
     x = np.arange(len(all_emotions))
     width = 0.35
-    plt.figure(figsize=(10, 6))
-    plt.bar(x - width/2, speech_counts, width, label="Speech", color='skyblue')
-    plt.bar(x + width/2, face_counts, width, label="Face", color='salmon')
+    plt.figure(figsize=(10, 7))
+    plt.bar(x - width/2, speech_counts, width, label="Speech", color='#1f77b4')
+    plt.bar(x + width/2, face_counts, width, label="Face", color='#ff7f0e')
     plt.xlabel("Emotion")
     plt.ylabel("Count")
     plt.title("Emotion Distribution (Speech vs Face)")
@@ -219,12 +215,12 @@ def dashboard():
     plt.savefig("static/emotion_distribution_bar.png")
     plt.close()
 
-    # --- Speaker Timeline ---
+    # --- Speaker Timeline --------------------------------------------------------------------------------------
     speaker_df = final_df.copy()
     speaker_df["start_sec"] = speaker_df["Start"].apply(time_to_sec)
     speaker_df["end_sec"] = speaker_df["End"].apply(time_to_sec)
     speaker_plot = go.Figure()
-    colors = {"Client": "#00BFFF", "therapist": "#FF7F50"}
+    colors_speaker = {"Client": "#1f77b4", "therapist": "#2ca02c"} 
     for speaker in speaker_df["Speaker"].unique():
         df_s = speaker_df[speaker_df["Speaker"] == speaker]
         speaker_plot.add_trace(go.Bar(
@@ -233,31 +229,34 @@ def dashboard():
             base=df_s["start_sec"],
             orientation='h',
             name=speaker,
-            marker=dict(color=colors.get(speaker, "#999")),
+            marker=dict(color=colors_speaker.get(speaker, "#999")),
             hovertext=df_s["Text"]
         ))
     speaker_plot.update_layout(
-        title="👥 Speaker Timeline",
         xaxis_title="Time (seconds)",
         barmode='stack',
-        height=300,
+        height=400,
         template="plotly_white"
     )
     speaker_html = speaker_plot.to_html(full_html=False)
 
-    # --- Emotion Transition Sankey ---
+    # --- Emotion Transition Sankey -------------------------------------------------------------------------------
     transitions = list(zip(client_df["speech_predicted_emotion"], client_df["speech_predicted_emotion"].shift(-1)))
     transitions = [t for t in transitions if t[0] != t[1] and pd.notna(t[1])]
     transition_counts = Counter(transitions)
     labels = list(set([src for src, _ in transitions] + [tgt for _, tgt in transitions]))
     label_to_index = {label: idx for idx, label in enumerate(labels)}
+
+    node_colors = ['#1f77b4', '#2ca02c', '#ff7f0e', '#17becf', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+    node_color_map = [node_colors[i % len(node_colors)] for i in range(len(labels))]
+
     sankey_fig = go.Figure(data=[go.Sankey(
         node=dict(
             pad=15,
             thickness=20,
             line=dict(color="black", width=0.5),
             label=labels,
-            color="lightgray"
+            color=node_color_map
         ),
         link=dict(
             source=[label_to_index[src] for src, _ in transition_counts],
@@ -265,20 +264,54 @@ def dashboard():
             value=list(transition_counts.values())
         )
     )])
-    sankey_fig.update_layout(title_text="🔁 Emotion Transition Flow", height=400, template="plotly_white")
+    sankey_fig.update_layout(height=500, template="plotly_white")
     sankey_html = sankey_fig.to_html(full_html=False)
 
-    # --- Word Clouds ---
+    # --- Word Clouds ---------------------------------------------------------------------------------------------
     wordcloud_dir = "static/wordclouds"
     shutil.rmtree(wordcloud_dir, ignore_errors=True)
     os.makedirs(wordcloud_dir, exist_ok=True)
     emotion_texts = client_df.groupby("speech_predicted_emotion")["Text"].apply(lambda x: " ".join(x)).to_dict()
     wordcloud_paths = []
     for emotion, text in emotion_texts.items():
-        wc = WordCloud(width=500, height=300, background_color="white").generate(text)
+        wc = WordCloud(width=500, height=400, background_color="white").generate(text)
         filepath = os.path.join(wordcloud_dir, f"{emotion}.png")
         wc.to_file(filepath)
         wordcloud_paths.append((emotion, f"wordclouds/{emotion}.png"))
+
+    #----Speech Emotion heatmap over time---------------------------------------------------------------------------
+    heatmap_df = client_df.copy()
+    heatmap_df['time_bin'] = pd.cut(heatmap_df['start_sec'], bins=10, labels=False)
+
+    heatmap_data = pd.crosstab(heatmap_df['speech_predicted_emotion'], heatmap_df['time_bin'])
+
+    plt.figure(figsize=(12, 7))
+    sns.heatmap(heatmap_data, cmap='Blues', annot=True, fmt='d', linewidths=.5)
+    plt.xlabel("Time Segments")
+    plt.ylabel("Emotion")
+    plt.title("Emotion Frequency Heatmap Over Time (Speech)")
+    plt.tight_layout()
+    heatmap_path = "static/emotion_heatmap.png"
+    plt.savefig(heatmap_path)
+    plt.close()
+
+    #- Face Emotion Heatmap over Time-----------------------------------------------------------------------------------
+    heatmap_face_df = client_df.copy()
+    heatmap_face_df['time_bin'] = pd.cut(heatmap_face_df['start_sec'], bins=10, labels=False)
+
+    heatmap_face_data = pd.crosstab(heatmap_face_df['face_emotion_prediction'], heatmap_face_df['time_bin'])
+
+    plt.figure(figsize=(12, 7))
+    sns.heatmap(heatmap_face_data, cmap='Oranges', annot=True, fmt='d', linewidths=.5)
+    plt.xlabel("Time Segments")
+    plt.ylabel("Emotion")
+    plt.title("Emotion Frequency Heatmap Over Time (Face)")
+    plt.tight_layout()
+    heatmap_face_path = "static/emotion_heatmap_face.png"
+    plt.savefig(heatmap_face_path)
+    plt.close()
+
+    #--- Render the dashboard template ---------------------------------------------------------------------------------
 
     return render_template(
         'dashboard.html',

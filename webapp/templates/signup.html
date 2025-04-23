@@ -1,18 +1,17 @@
 {% extends 'base.html' %}
 {% block title %}Signup{% endblock %}
+
 {% block content %}
-<div class="container">
-  <div class="login-wrapper">
-    <h1 class="text-center login-title">Create Therapist Account</h1>
-    <div class="account-wall">
-      <img class="profile-img" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="">
-      <form class="form-signin" method="POST">
-        <input type="text" class="form-control" name="username" placeholder="Username" required autofocus>
-        <input type="password" class="form-control" name="password" placeholder="Password" required>
-        <button class="btn btn-primary btn-block" type="submit">Sign up</button>
-      </form>
+<div class="login-modal">
+  <img src="{{ url_for('static', filename='avatar7.png') }}" alt="Avatar" />
+  <h2>Create Account</h2>
+  <form method="POST">
+    <input type="text" name="username" placeholder="Email" required />
+    <input type="password" name="password" placeholder="Password" required />
+    <button type="submit" class="btn-primary">Sign Up</button>
+    <div class="footer-links">
+      <a href="{{ url_for('login') }}">Already have an account?</a>
     </div>
-    <a href="{{ url_for('login') }}" class="text-center new-account">Already have an account?</a>
-  </div>
+  </form>
 </div>
 {% endblock %}
