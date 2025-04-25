@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
 import matplotlib.pyplot as plt
 import numpy as np
 import io
@@ -143,43 +145,54 @@ def dashboard():
             return None
 
     client_df["start_sec"] = client_df["Start"].apply(time_to_sec)
+    client_df["end_sec"] = client_df["End"].apply(time_to_sec)  
+
+    client_df["duration"] = client_df["end_sec"] - client_df["start_sec"]
     client_df["speech_emotion_id"] = client_df["speech_predicted_emotion"].map(emotion_to_id)
     client_df["face_emotion_id"] = client_df["face_emotion_prediction"].map(emotion_to_id)
 
+    custom_order = ["Happy","Surprise","Neutral","Confusion",
+                    "Sadness","Fear","Disgust","Anger"]
+
     # --- Emotion Timeline ---------------------------------------------------------------------
+    custom_order = ["Happy","Surprise","Neutral","Confusion",
+                    "Sadness","Fear","Disgust","Anger"]
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=client_df["start_sec"],
-        y=client_df["speech_emotion_id"],
+        y=client_df["speech_predicted_emotion"],     # use the string labels
         mode='lines+markers',
         name='Speech Emotion',
-        marker=dict(size=10, color='#1f77b4'),  # Navy Blue
+        marker=dict(size=10, color='#1f77b4'),
         line=dict(width=2),
-        text=client_df["speech_predicted_emotion"],
-        hovertemplate='Time: %{x}s<br>Speech: %{text}<extra></extra>'
+        hovertemplate='Time: %{x}s<br>Speech: %{y}<extra></extra>'
     ))
+
     fig.add_trace(go.Scatter(
         x=client_df["start_sec"],
-        y=client_df["face_emotion_id"],
+        y=client_df["face_emotion_prediction"],      # use the string labels
         mode='lines+markers',
         name='Face Emotion',
-        marker=dict(size=10, color='#ff7f0e'),  # Orange
+        marker=dict(size=10, color='#ff7f0e'),
         line=dict(width=2),
-        text=client_df["face_emotion_prediction"],
-        hovertemplate='Time: %{x}s<br>Face: %{text}<extra></extra>'
+        hovertemplate='Time: %{x}s<br>Face: %{y}<extra></extra>'
     ))
+
+    # Categorical y-axis ordering
     fig.update_layout(
         xaxis_title="Time (seconds)",
         yaxis=dict(
             title="Emotion",
-            tickmode='array',
-            tickvals=list(emotion_to_id.values()),
-            ticktext=list(emotion_to_id.keys())
+            type="category",
+            categoryorder="array",
+            categoryarray=custom_order
         ),
         legend=dict(x=0.01, y=0.99),
         template="plotly_white",
         height=600
     )
+
     graph_html = fig.to_html(full_html=False)
 
     # --- Emotion Match Pie Chart ----------------------------------------------------------------------------
@@ -219,26 +232,86 @@ def dashboard():
     speaker_df = final_df.copy()
     speaker_df["start_sec"] = speaker_df["Start"].apply(time_to_sec)
     speaker_df["end_sec"] = speaker_df["End"].apply(time_to_sec)
-    speaker_plot = go.Figure()
-    colors_speaker = {"Client": "#1f77b4", "therapist": "#2ca02c"} 
-    for speaker in speaker_df["Speaker"].unique():
-        df_s = speaker_df[speaker_df["Speaker"] == speaker]
-        speaker_plot.add_trace(go.Bar(
-            x=df_s["end_sec"] - df_s["start_sec"],
-            y=df_s["Speaker"],
-            base=df_s["start_sec"],
-            orientation='h',
-            name=speaker,
-            marker=dict(color=colors_speaker.get(speaker, "#999")),
-            hovertext=df_s["Text"]
-        ))
-    speaker_plot.update_layout(
-        xaxis_title="Time (seconds)",
-        barmode='stack',
-        height=400,
-        template="plotly_white"
+    speaker_df["duration"]  = speaker_df["end_sec"] - speaker_df["start_sec"]
+    speaker_df["Speaker_Title"] = speaker_df["Speaker"].str.title()
+
+    totals = (
+        speaker_df
+        .groupby("Speaker_Title", as_index=False)["duration"]
+        .sum()
     )
-    speaker_html = speaker_plot.to_html(full_html=False)
+
+    fig = make_subplots(
+        rows=1, cols=2,
+        column_widths=[0.75, 0.25],
+        specs=[[{"type":"xy"}, {"type":"domain"}]],
+        subplot_titles=("Speaking Segments Over Time", "Time Share"),
+        horizontal_spacing=0.1
+    )
+
+    colors = {"Client":"#1f77b4", "Therapist":"#ff7f0e"}
+
+    # Left: Gantt-style bars
+    for speaker in speaker_df["Speaker_Title"].unique():
+        df_s = speaker_df[speaker_df["Speaker_Title"] == speaker]
+        fig.add_trace(
+            go.Bar(
+                x=df_s["duration"],
+                y=df_s["Speaker_Title"],
+                base=df_s["start_sec"],
+                orientation="h",
+                name=speaker,
+                marker=dict(
+                    color=colors[speaker],
+                    line=dict(color="white", width=1)
+                ),
+                hovertemplate=(
+                    "Speaker: %{y}<br>"
+                    "Start: %{base}s<br>"
+                    "Duration: %{x}s<br>"
+                    "<extra></extra>"
+                )
+            ),
+            row=1, col=1
+        )
+
+    fig.update_xaxes(
+        title_text="Time (seconds)",
+        row=1, col=1,
+        tickformat=".0f",
+        showgrid=True,
+        gridcolor="lightgrey"
+    )
+    fig.update_yaxes(
+        autorange="reversed",
+        row=1, col=1
+    )
+
+    fig.add_trace(
+        go.Pie(
+            labels=totals["Speaker_Title"],
+            values=totals["duration"],
+            hole=0.5,
+            marker=dict(colors=[colors[s] for s in totals["Speaker_Title"]]),
+            textinfo="label+percent",
+            sort=False,
+            domain=dict(x=[0.78, 0.98], y=[0.1, 0.9])
+        ),
+        row=1, col=2
+    )
+
+    fig.update_layout(
+        title_text="Speaking Segments and Time Share",
+        width=1200,
+        height=500,
+        margin=dict(l=80, r=40, t=80, b=40),
+        template="plotly_white",
+        showlegend=False,
+        bargap=0.05,
+        font=dict(size=12)
+    )
+
+    speaker_html = fig.to_html(full_html=False)
 
     # --- Emotion Transition Sankey -------------------------------------------------------------------------------
     transitions = list(zip(client_df["speech_predicted_emotion"], client_df["speech_predicted_emotion"].shift(-1)))

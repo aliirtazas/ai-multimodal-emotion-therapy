@@ -22,16 +22,18 @@
   <div>{{ graph_html|safe }}</div>
 </section>
 
-<!-- Section: Speaker Timeline -->
-<section class="dashboard-block" style="margin-bottom: 60px;">
-  <h3>👥 Speaker Timeline</h3>
-  <div>{{ speaker_html|safe }}</div>
-</section>
-
 <!-- Section: Emotion Transition Sankey -->
 <section class="dashboard-block" style="margin-bottom: 60px;">
   <h3>🔁 Emotion Transition Flow</h3>
   <div>{{ sankey_html|safe }}</div>
+</section>
+
+<!-- Section: Speaker Timeline -->
+<section class="dashboard-block" style="margin-bottom: 60px;">
+  <h3>👥 Speaker Timeline</h3>
+  <div style="width:100%; overflow-x:auto;">
+    {{ speaker_html|safe }}
+  </div>
 </section>
 
 <!-- Section: Emotion Heatmap -->
