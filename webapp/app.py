@@ -355,6 +355,7 @@ def dashboard():
     heatmap_df['time_bin'] = pd.cut(heatmap_df['start_sec'], bins=10, labels=False)
 
     heatmap_data = pd.crosstab(heatmap_df['speech_predicted_emotion'], heatmap_df['time_bin'])
+    heatmap_data = heatmap_data.reindex(index=custom_order, fill_value=0)
 
     plt.figure(figsize=(12, 7))
     sns.heatmap(heatmap_data, cmap='Blues', annot=True, fmt='d', linewidths=.5)
@@ -371,6 +372,7 @@ def dashboard():
     heatmap_face_df['time_bin'] = pd.cut(heatmap_face_df['start_sec'], bins=10, labels=False)
 
     heatmap_face_data = pd.crosstab(heatmap_face_df['face_emotion_prediction'], heatmap_face_df['time_bin'])
+    heatmap_face_data = heatmap_face_data.reindex(index=custom_order, fill_value=0)
 
     plt.figure(figsize=(12, 7))
     sns.heatmap(heatmap_face_data, cmap='Oranges', annot=True, fmt='d', linewidths=.5)
