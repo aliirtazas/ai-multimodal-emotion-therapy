@@ -183,3 +183,8 @@ cython_debug/
 /webapp/static/*.jpeg
 /webapp/Extracted_Images/
 /webapp/Extracted_Images/*.jpg
+static/*.png
+/static/wordclouds/*.jpg
+/static/wordclouds/*.png
+
+static/sessions/*.json
