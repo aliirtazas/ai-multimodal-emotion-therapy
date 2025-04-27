@@ -22,7 +22,7 @@ from torchvision import transforms
 import torch.nn as nn
 from moviepy import *
 
-# ----- Global Variables -----
+# ----- Global Variables -----------------------------------------------------
 emotion_labels = {
     0: "Anger", 1: "Fear", 2: "Happy", 3: "Sadness",
     4: "Neutral", 5: "Surprise", 6: "Confusion", 7: "Disgust"
@@ -58,8 +58,9 @@ def transcribe_and_diarize(video_path, hf_token, whisper_model="large-v2", devic
     df["total_duration"] = df["End (sec)"] - df["Start (sec)"]
     return df
 
-# --------------------------- Speaker Prediction ---------------------------
 
+# --------------------------- Speaker Prediction ---------------------------
+# Load model components
 def load_speaker_model(model_dir, device):
     model = RobertaForSequenceClassification.from_pretrained(model_dir).to(device)
     tokenizer = RobertaTokenizer.from_pretrained(model_dir)
@@ -67,6 +68,7 @@ def load_speaker_model(model_dir, device):
     model.eval()
     return model, tokenizer, label_encoder
 
+# Predict speaker label
 def predict_speaker_class(df_subset, model, tokenizer, label_encoder, device):
     dataset = Dataset.from_pandas(df_subset[["Text"]].rename(columns={"Text": "utterance"}))
     dataset = dataset.map(lambda x: tokenizer(x["utterance"], padding="max_length", truncation=True, max_length=512), batched=True)
@@ -84,61 +86,78 @@ def predict_speaker_class(df_subset, model, tokenizer, label_encoder, device):
     return label_encoder.inverse_transform(all_preds)
 
 def classify_and_map_speakers(df, model, tokenizer, label_encoder, device):
-    speaker_00_df = df[df["Speaker"] == "SPEAKER_00"].copy()
-    speaker_00_preds = predict_speaker_class(speaker_00_df, model, tokenizer, label_encoder, device)
-    speaker_00_df["Predicted"] = speaker_00_preds
-    majority_00 = speaker_00_df["Predicted"].value_counts().idxmax()
+    # Normalize column names
+    df = df.rename(columns={"Start (sec)": "start_sec", "End (sec)": "end_sec"})
 
-    speaker_01_df = df[df["Speaker"] == "SPEAKER_01"].copy()
-    speaker_01_preds = predict_speaker_class(speaker_01_df, model, tokenizer, label_encoder, device)
-    speaker_01_df["Predicted"] = speaker_01_preds
-    majority_01 = speaker_01_df["Predicted"].value_counts().idxmax()
+    # SPEAKER_00
+    s0 = df[df["Speaker"] == "SPEAKER_00"].copy()
+    p0 = predict_speaker_class(s0, model, tokenizer, label_encoder, device)
+    s0["Pred"] = p0
+    vc0 = s0["Pred"].value_counts()
+    maj0, pct0 = vc0.idxmax().lower(), vc0.max() / len(s0)
 
-    if majority_00.lower() == "client":
-        speaker_map = {"SPEAKER_00": "Client", "SPEAKER_01": "therapist"}
+    # SPEAKER_01
+    s1 = df[df["Speaker"] == "SPEAKER_01"].copy()
+    p1 = predict_speaker_class(s1, model, tokenizer, label_encoder, device)
+    s1["Pred"] = p1
+    vc1 = s1["Pred"].value_counts()
+    maj1, pct1 = vc1.idxmax().lower(), vc1.max() / len(s1)
+
+    # Choose winner by confidence
+    if pct0 >= pct1:
+        win_key, win_lbl = "SPEAKER_00", maj0
+        lose_key = "SPEAKER_01"
     else:
-        speaker_map = {"SPEAKER_00": "therapist", "SPEAKER_01": "Client"}
+        win_key, win_lbl = "SPEAKER_01", maj1
+        lose_key = "SPEAKER_00"
 
+    opp_lbl = "therapist" if win_lbl == "client" else "client"
+    speaker_map = {win_key: win_lbl.title(), lose_key: opp_lbl.title()}
     return df.replace({"Speaker": speaker_map})
 
+# Convert seconds to MM:SS
 def sec_to_min_sec(seconds):
     minutes = int(seconds) // 60
     seconds = int(seconds) % 60
     return f"{minutes:02d}:{seconds:02d}"
 
+# Merge therapist segments
 def merge_conversation_segments(df):
-    merged_data = []
-    current_speaker = df.loc[0, 'Speaker']
-    current_start = df.loc[0, 'Start (sec)']
-    current_end = df.loc[0, 'End (sec)']
-    current_text = df.loc[0, 'Text']
+    df = df.sort_values("start_sec").reset_index(drop=True)
+    if df.empty:
+        return pd.DataFrame(columns=["Start","End","Speaker","Text"])
+
+    merged = []
+    curr_spk   = df.loc[0, "Speaker"]
+    curr_start = df.loc[0, "start_sec"]
+    curr_end   = df.loc[0, "end_sec"]
+    curr_txt   = df.loc[0, "Text"]
 
     for i in range(1, len(df)):
-        row = df.loc[i]
-        speaker = row['Speaker']
-        if speaker == current_speaker:
-            current_end = row['End (sec)']
-            current_text += " " + row['Text']
+        r = df.loc[i]
+        if r["Speaker"] == curr_spk:
+            curr_end  = r["end_sec"]
+            curr_txt += " " + r["Text"]
         else:
-            merged_data.append({
-                'Start': sec_to_min_sec(current_start),
-                'End': sec_to_min_sec(current_end),
-                'Speaker': current_speaker,
-                'Text': current_text
+            merged.append({
+                "Start":   sec_to_min_sec(curr_start),
+                "End":     sec_to_min_sec(curr_end),
+                "Speaker": curr_spk,
+                "Text":    curr_txt
             })
-            current_speaker = speaker
-            current_start = row['Start (sec)']
-            current_end = row['End (sec)']
-            current_text = row['Text']
+            curr_spk   = r["Speaker"]
+            curr_start = r["start_sec"]
+            curr_end   = r["end_sec"]
+            curr_txt   = r["Text"]
 
-    merged_data.append({
-        'Start': sec_to_min_sec(current_start),
-        'End': sec_to_min_sec(current_end),
-        'Speaker': current_speaker,
-        'Text': current_text
+    merged.append({
+        "Start":   sec_to_min_sec(curr_start),
+        "End":     sec_to_min_sec(curr_end),
+        "Speaker": curr_spk,
+        "Text":    curr_txt
     })
 
-    return pd.DataFrame(merged_data)
+    return pd.DataFrame(merged)
 
 # --------------------------- Face Extraction ---------------------------
 
@@ -269,7 +288,6 @@ def process_video_pipeline(video_path, hf_token, view_type, face_option):
     face_model_path = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\cv model\best_model (1).pth"
     output_dir = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\webapp\Extracted_Images"
 
-    #Transcribe
     df = transcribe_and_diarize(video_path, hf_token=hf_token)
 
     #Speaker classification
