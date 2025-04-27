@@ -1,22 +1,41 @@
-# AI-Powered Multimodal Emotion Analysis System for Therapy Session
+# EmotiAI: AI-Powered Multimodal Emotion Analysis System for Online Therapy Session
 
 **🔍 An AI system for analyzing patient emotions in therapy using speech transcription, facial expression recognition, and speaker-based segmentation.**
 
 ## 📌 Overview
-This system integrates **Natural Language Processing (NLP)** and **Computer Vision (CV)** to analyze client emotions in recorded therapy sessions (e.g., Zoom, Google Meet). It performs speaker-based segmentation, transcribes patient responses, and classifies both spoken and facial emotions using deep learning. Therapists can upload session recordings (Gallery View or Speaker View), and the system automatically extracts the patient's segments to generate detailed emotional timelines and visualizations.
+
+EmotIAI is an end-to-end AI support system that helps therapists understand their clients’ emotions more deeply during therapy sessions.
+It combines Natural Language Processing and Computer Vision techniques to analyze Zoom therapy recordings, extracting emotional insights from both spoken words and facial expressions.
+
+Therapists can simply upload a session video — whether in Gallery View or Speaker View — and EmotIAI automatically:
+
+- Identifies patient segments
+
+- Classifies emotions from speech and face
+
+- Generates intuitive dashboards tracking emotional patterns throughout the session.
 
 ## 🚀 Features
-✔ **Speech-to-Text Conversion** – Extracts spoken responses using ASR (Automatic Speech Recognition).
+✔️ Speech-to-Text Conversion
+→ Converts audio into precise word-level transcripts using WhisperX.
 
-✔ **Text-Based Emotion Analysis (NLP)** – Uses a fine-tuned BERT-based model to classify emotions from patient responses.
+✔️ Speaker Role Classification
+→ Automatically separates therapist and client turns using a fine-tuned Roberta model.
 
-✔ **Facial Emotion Detection (CV)** – Detects emotions like joy, sadness, anger, and surprise using deep learning models.
+✔️ Text-Based Emotion Analysis
+→ Predicts patient emotions like Sadness, Anger, Happy, Fear, Confusion, Surprise from speech using a fine-tuned DeBERTa-v3 model.
 
-✔ **Speaker-Based Segmentation** – Automatically separates therapist and client turns using diarization and speaker classification.
+✔️ Facial Emotion Recognition
+→ Classifies subtle facial expressions using a fine-tuned ResNet-18 model trained on AffectNet.
 
-✔ **Video View Support** – Handles both Gallery View and Speaker View recordings for accurate face extraction.
+✔️ Gallery and Speaker View Support
+→ Works with different Zoom recording layouts, automatically identifying the client's face.
 
-✔ **Emotion Visualization** – Generates emotion graphs to track sentiment trends over time.
+✔️ Multimodal Emotion Timeline
+→ Merges both speech emotion and face emotion into a single dashboard view.
+
+✔️ Professional Emotion Dashboard
+→ Visualizes emotional trends, distributions, and transitions over time to assist therapists in analysis.
 
 ## Project Structure
 
@@ -32,9 +51,9 @@ This system integrates **Natural Language Processing (NLP)** and **Computer Visi
 │── README.md               # Project documentation
 ```
 
-## 🔧 Installation
+## 🔧 Installation Guide
 ```bash
-git clone https://github.com/your-username/ai-multimodal-emotion-therapy.git
+git clone https://github.com/aliirtazas/ai-multimodal-emotion-therapy.git
 cd ai-multimodal-emotion-therapy
 pip install -r requirements.txt
 
@@ -42,24 +61,44 @@ pip install -r requirements.txt
 cd webapp
 python app.py
 ```
+The app will start locally at http://127.0.0.1:5000/.
 
 ## 📊 Datasets
-We use publicly available emotion datasets for fine-tuning and training the models, such as:
+We fine-tuned and trained our models using carefully selected open-source datasets:
 
-- ISEAR (Emotion Classification)
-- GoEmotions (Fine-grained Emotion Labels)
-- DailyDialog (Conversational Emotion Data)
-- MELD
-- Google Affective Datasets
-- AffectNet
+Speech Emotion Datasets:
+
+ISEAR — International Survey on Emotions
+
+GoEmotions — Fine-grained Reddit emotion dataset
+
+DailyDialog — Conversational dialogue emotions
+
+EsConv — Emotional support conversations
+
+Dair-ai Open Datasets
+
+Facial Emotion Dataset:
+
+AffectNet — Over 450,000 labeled images
+
+(Compared with RAF-DB and FER++ for evaluation)
 
 ## 🏗️ How It Works
-1️⃣ Extract speech → Convert audio to text using ASR.
+1. Upload a Zoom/Meet recording → Select View Type (Gallery/Speaker) and Face Option.
 
-2️⃣ Analyze text emotion → Classify emotions using a BERT-based model.
+2. Audio Extraction → Convert audio to WAV format.
 
-3️⃣ Detect facial emotions → Process video frames to classify facial expressions.
+3. Transcription + Diarization → Extract speech and separate speakers (WhisperX).
 
-4️⃣ Segment responses → Use motion detection to isolate patient responses.
+4. Speaker Role Classification → Predict who is the Therapist vs Client (Roberta).
 
-5️⃣ Visualize insights → Generate emotion trajectories and reports.
+5. Face Extraction → Capture client’s face frames from video.
+
+6. Emotion Predictions → Predict speech emotions (DeBERTa) and face emotions (ResNet18).
+
+7. Dashboard Visualization → Generate emotion timelines, distribution charts, and transitions.
+
+## Website
+
+![About]](1.png)
