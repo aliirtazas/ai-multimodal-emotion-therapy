@@ -161,7 +161,7 @@ def dashboard():
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=client_df["start_sec"],
-        y=client_df["speech_predicted_emotion"],     # use the string labels
+        y=client_df["speech_predicted_emotion"],
         mode='lines+markers',
         name='Speech Emotion',
         marker=dict(size=10, color='#1f77b4'),
@@ -171,7 +171,7 @@ def dashboard():
 
     fig.add_trace(go.Scatter(
         x=client_df["start_sec"],
-        y=client_df["face_emotion_prediction"],      # use the string labels
+        y=client_df["face_emotion_prediction"],
         mode='lines+markers',
         name='Face Emotion',
         marker=dict(size=10, color='#ff7f0e'),
@@ -179,7 +179,6 @@ def dashboard():
         hovertemplate='Time: %{x}s<br>Face: %{y}<extra></extra>'
     ))
 
-    # Categorical y-axis ordering
     fig.update_layout(
         xaxis_title="Time (seconds)",
         yaxis=dict(
@@ -199,7 +198,7 @@ def dashboard():
     client_df["emotion_match"] = client_df["speech_predicted_emotion"] == client_df["face_emotion_prediction"]
     match_counts = client_df["emotion_match"].value_counts()
     labels = ["Match" if x else "Mismatch" for x in match_counts.index]
-    colors_pie = ['#1f77b4', '#ff7f0e']  # Green for match, Orange for mismatch
+    colors_pie = ['#1f77b4', '#ff7f0e']
     plt.figure(figsize=(6, 7))
     plt.pie(match_counts, labels=labels, autopct="%1.1f%%", colors=colors_pie)
     plt.title("Emotion Agreement Between Speech & Face")
@@ -251,7 +250,6 @@ def dashboard():
 
     colors = {"Client":"#1f77b4", "Therapist":"#ff7f0e"}
 
-    # Left: Gantt-style bars
     for speaker in speaker_df["Speaker_Title"].unique():
         df_s = speaker_df[speaker_df["Speaker_Title"] == speaker]
         fig.add_trace(

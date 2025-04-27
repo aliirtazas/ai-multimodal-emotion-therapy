@@ -22,7 +22,7 @@ from torchvision import transforms
 import torch.nn as nn
 from moviepy import *
 
-# ----- Global Variables -----
+# ----- Global Variables -----------------------------------------------------
 emotion_labels = {
     0: "Anger", 1: "Fear", 2: "Happy", 3: "Sadness",
     4: "Neutral", 5: "Surprise", 6: "Confusion", 7: "Disgust"
@@ -123,7 +123,6 @@ def sec_to_min_sec(seconds):
 
 # Merge therapist segments
 def merge_conversation_segments(df):
-    # expects df with ['start_sec','end_sec','Speaker','Text']
     df = df.sort_values("start_sec").reset_index(drop=True)
     if df.empty:
         return pd.DataFrame(columns=["Start","End","Speaker","Text"])
@@ -289,17 +288,16 @@ def process_video_pipeline(video_path, hf_token, view_type, face_option):
     face_model_path = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\models\cv model\best_model (1).pth"
     output_dir = r"D:\Data Science Projects Github\ai-multimodal-emotion-therapy\webapp\Extracted_Images"
 
-    # Step 1: Transcribe
     df = transcribe_and_diarize(video_path, hf_token=hf_token)
 
-    # Step 2: Speaker classification
+    #Speaker classification
     spk_model, spk_tokenizer, spk_encoder = load_speaker_model(speaker_model_path, device)
     df = classify_and_map_speakers(df, spk_model, spk_tokenizer, spk_encoder, device)
 
-    # Step 3: Merge segments
+    #Merge segments
     final_df = merge_conversation_segments(df)
 
-    # Step 4: Prepare client segments
+    #Prepare client segments
     client_df = final_df[final_df["Speaker"].str.lower() == "client"].copy()
     client_df["Start_sec"] = client_df["Start"].apply(time_to_seconds)
     client_df["End_sec"] = client_df["End"].apply(time_to_seconds)
@@ -307,20 +305,20 @@ def process_video_pipeline(video_path, hf_token, view_type, face_option):
     client_df["Mid_sec"] = client_df["Mid_sec"].round().astype(int)
     client_df = client_df.reset_index(drop=True)
 
-    # Step 5: Face extraction
+    #Face extraction
     client_df = extract_faces_for_client_segments(client_df, video_path, output_dir, view_type, face_option)
     client_df = client_df.dropna()
     client_df = client_df.reset_index(drop=True)
 
-    # Step 6: Text emotion prediction
+    #Text emotion prediction
     client_df = add_speech_emotions_to_client_df(client_df, speech_model_path)
 
-    # Step 7: Face emotion prediction
+    #Face emotion prediction
     client_df = add_face_emotions_to_client_df(client_df, face_model_path)
     client_df = client_df.dropna()
     client_df = client_df.reset_index(drop=True)
 
-    # Step 8: Merge back into final_df
+    #Merge back into final_df
     for idx in client_df.index:
         final_df.loc[client_df.index[idx], 'Image_Path'] = client_df.at[idx, 'Image_Path']
         final_df.loc[client_df.index[idx], 'speech_predicted_emotion'] = client_df.at[idx, 'speech_predicted_emotion']
